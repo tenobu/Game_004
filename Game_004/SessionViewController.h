@@ -9,15 +9,15 @@
 #import <UIKit/UIKit.h>
 #import <MultipeerConnectivity/MultipeerConnectivity.h>
 
-@interface SessionViewController : UIViewController < /*MCNearbyServiceAdvertiserDelegate,*/ MCAdvertiserAssistantDelegate,    MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate >
+@interface SessionViewController : UIViewController < MCNearbyServiceAdvertiserDelegate, /*MCAdvertiserAssistantDelegate,    MCBrowserViewControllerDelegate,*/ MCNearbyServiceBrowserDelegate, MCSessionDelegate >
 {
 
 }
 
 @property (strong, nonatomic) NSString *serviceType;
 @property (strong, nonatomic) MCNearbyServiceBrowser *nearbyServiceBrowser;
-//@property (strong, nonatomic) MCNearbyServiceAdvertiser *nearbyServiceAdvertiser;
-@property (strong, nonatomic) MCAdvertiserAssistant *advertiserAssistant;
+@property (strong, nonatomic) MCNearbyServiceAdvertiser *nearbyServiceAdvertiser;
+//@property (strong, nonatomic) MCAdvertiserAssistant *advertiserAssistant;
 
 @property (weak, nonatomic) IBOutlet UILabel *label_ServerModel;
 @property (weak, nonatomic) IBOutlet UILabel *label_DisplayName;

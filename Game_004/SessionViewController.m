@@ -86,21 +86,21 @@
 								   self.label_DisplayName.text, @"display_name",
 								   @"000000"                  , @"your_tansu"  , nil];
 
-//	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
-//																	 discoveryInfo: discoveryInfo
-//																	   serviceType: self.serviceType];
-//		
-//	self.nearbyServiceAdvertiser.delegate = self;
-//		
-//	[self.nearbyServiceAdvertiser startAdvertisingPeer];
+	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
+																	 discoveryInfo: discoveryInfo
+																	   serviceType: self.serviceType];
+		
+	self.nearbyServiceAdvertiser.delegate = self;
+		
+	[self.nearbyServiceAdvertiser startAdvertisingPeer];
 
-	self.advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType: self.serviceType
-																	discoveryInfo: discoveryInfo
-																		  session: app.session];
-
-	self.advertiserAssistant.delegate = self;
-	
-	[self.advertiserAssistant start];
+//	self.advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType: self.serviceType
+//																	discoveryInfo: discoveryInfo
+//																		  session: app.session];
+//
+//	self.advertiserAssistant.delegate = self;
+//	
+//	[self.advertiserAssistant start];
 	
 	[self setDisplayClient];
 	
