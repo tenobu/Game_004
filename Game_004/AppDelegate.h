@@ -16,9 +16,8 @@
 @property (strong, nonatomic) MCPeerID *myPeerID;
 @property (strong, nonatomic) MCSession *session;
 
-@property (strong, nonatomic) NSString *string_ServerClient;
-
-@property (strong, nonatomic) NSMutableArray *array_PeerID;
+@property (strong, nonatomic) NSMutableArray *array_ServerID;
+@property (strong, nonatomic) NSMutableArray *array_ClientID;
 
 @end
 

@@ -11,6 +11,10 @@
 #import "AppDelegate.h"
 
 @interface SessionViewController ()
+{
+
+	
+}
 
 @end
 
@@ -39,21 +43,12 @@
 
 	UIDevice *dev = [UIDevice currentDevice];
 
-	self.label_Model.text = dev.name;
+	self.label_ServerModel.text = dev.name;
+	self.label_DisplayName.text = app.myPeerID.displayName;
 	
 	NSLog( @"%@", dev.name );
 
-	if ( [app.string_ServerClient isEqualToString: @"Server"] ) {
-
-		[self.switch_Server setOn: YES];
-		
-	} else {
-		
-		[self.switch_Server setOn: NO];
-		
-	}
-	
-	[self switch_Server_Action: nil];
+	[self setServerClient];
 	
 	[self setDisplayClient];
 	
@@ -67,55 +62,47 @@
 
 }
 
-// サーバーとクライアントを切り替える
-- (IBAction)switch_Server_Action:(id)sender
+// サーバーとクライアントを設定
+- (void)setServerClient
 {
 
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 
-	[app.array_PeerID removeAllObjects];
+	//[app.array_PeerID removeAllObjects];
+	
+	
+	// サーバー
+	self.nearbyServiceBrowser = [[MCNearbyServiceBrowser alloc] initWithPeer: app.myPeerID
+																 serviceType: self.serviceType];
+		
+	self.nearbyServiceBrowser.delegate = self;
+		
+	[self.nearbyServiceBrowser startBrowsingForPeers];
+	
+
+	// クライアント
+	NSDictionary *discoveryInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
+								   self.label_ServerModel.text, @"name"        ,
+								   self.label_DisplayName.text, @"display_name",
+								   @"000000"                  , @"your_tansu"  , nil];
+
+//	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
+//																	 discoveryInfo: discoveryInfo
+//																	   serviceType: self.serviceType];
+//		
+//	self.nearbyServiceAdvertiser.delegate = self;
+//		
+//	[self.nearbyServiceAdvertiser startAdvertisingPeer];
+
+	self.advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType: self.serviceType
+																	discoveryInfo: discoveryInfo
+																		  session: app.session];
+
+	self.advertiserAssistant.delegate = self;
+	
+	[self.advertiserAssistant start];
 	
 	[self setDisplayClient];
-	
-	
-	if ( self.switch_Server.on ) {
-		
-		self.label_Server.text = @"サーバーにする";
-
-		self.nearbyServiceAdvertiser.delegate = nil;
-		self.nearbyServiceAdvertiser = nil;
-		
-		self.nearbyServiceBrowser = [[MCNearbyServiceBrowser alloc] initWithPeer: app.myPeerID
-																	 serviceType: self.serviceType];
-		
-		self.nearbyServiceBrowser.delegate = self;
-		
-		[self.nearbyServiceBrowser startBrowsingForPeers];
-	
-		app.string_ServerClient = @"Server";
-		
-	} else {
-		
-		self.label_Server.text = @"クライアントにする";
-
-		self.nearbyServiceBrowser.delegate = nil;
-		self.nearbyServiceBrowser = nil;
-		
-		NSDictionary *discoveryInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-									   self.label_Model.text, @"name"      ,
-									   @"000000"            , @"your_tansu", nil];
-
-		self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
-																		 discoveryInfo: discoveryInfo
-																		   serviceType: self.serviceType];
-		
-		self.nearbyServiceAdvertiser.delegate = self;
-		
-		[self.nearbyServiceAdvertiser startAdvertisingPeer];
-		
-		app.string_ServerClient = @"Client";
-	
-	}
 	
 }
 
@@ -169,7 +156,7 @@ withDiscoveryInfo: (NSDictionary *)info
 
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 	
-	for ( NSDictionary *dir in app.array_PeerID ) {
+	for ( NSDictionary *dir in app.array_ClientID ) {
 		
 		MCPeerID *peer_id = [dir objectForKey: @"peer_id"];
 		
@@ -185,7 +172,7 @@ withDiscoveryInfo: (NSDictionary *)info
 								name              , @"name"        ,
 								@"000000"         , @"your_tensu"  , nil];
 	
-	[app.array_PeerID addObject: dir];
+	[app.array_ClientID addObject: dir];
 
 	[self setDisplayClient];
 	
@@ -215,13 +202,13 @@ withDiscoveryInfo: (NSDictionary *)info
 
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 	
-	for ( NSDictionary *dir in app.array_PeerID ) {
+	for ( NSDictionary *dir in app.array_ClientID ) {
 		
 		MCPeerID *peer_id = [dir objectForKey: @"peer_id"];
 		
 		if ( [peer_id isEqual: peerID] ) {
 			
-			[app.array_PeerID removeObject: dir];
+			[app.array_ClientID removeObject: dir];
 
 			[self setDisplayClient];
 			
@@ -289,10 +276,13 @@ didReceiveInvitationFromPeer: (MCPeerID *)peerID
 
 // session:didReceiveData:fromPeer:
 // Called when a remote peer sends an NSData object to the local peer. (required)
-- (void)session:(MCSession *)session didReceiveData:(NSData *)data fromPeer:(MCPeerID *)peerID
+- (void)session: (MCSession *)session
+ didReceiveData: (NSData *)data
+	   fromPeer: (MCPeerID *)peerID
 {
 
-	NSString *receivedData = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSString *receivedData = [[NSString alloc] initWithData: data
+												   encoding: NSUTF8StringEncoding];
 //	[self showAlert:@"didReceiveData" message:receivedData];
 }
 
@@ -353,62 +343,62 @@ didReceiveInvitationFromPeer: (MCPeerID *)peerID
 	return TRUE;
 }
 
-
-# pragma mark - Advertising
-
-// -----------------------------
-// Advertising
-// -----------------------------
-
-- (void)startAdvertising
-{
-	
-	NSDictionary *discoveryInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-								   @"foo", @"bar", @"bar", @"foo", nil];
-	
-	AppDelegate *app = [[UIApplication sharedApplication] delegate];
-
-	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
-																	 discoveryInfo: discoveryInfo
-																	   serviceType: self.serviceType];
-	self.nearbyServiceAdvertiser.delegate = self;
-	
-	[self.nearbyServiceAdvertiser startAdvertisingPeer];
-
-}
-
-- (IBAction)btnStartAdvertisingIPHONE:(id)sender
-{
-
-	//[self showAlert:@"iPhone" message:@"startAdvertisingPeer"];
-	[self startAdvertising];
-
-}
-
-- (IBAction)btnStartAdvertisingIPAD:(id)sender
-{
-
-	//[self showAlert:@"iPad" message:@"startAdvertisingPeer"];
-	[self startAdvertising];
-
-}
-
-- (IBAction)btnStopAdvertisingIPHONE:(id)sender
-{
-
-	//[self showAlert:@"iPhone" message:@"stopAdvertisingPeer"];
-	[self.nearbyServiceAdvertiser stopAdvertisingPeer];
-
-}
-
-- (IBAction)btnStopAdvertisingIPAD:(id)sender
-{
-
-	//[self showAlert:@"iPad" message:@"stopAdvertisingPeer"];
-	[self.nearbyServiceAdvertiser stopAdvertisingPeer];
-
-}
-
+//
+//# pragma mark - Advertising
+//
+//// -----------------------------
+//// Advertising
+//// -----------------------------
+//
+//- (void)startAdvertising
+//{
+//	
+//	NSDictionary *discoveryInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
+//								   @"foo", @"bar", @"bar", @"foo", nil];
+//	
+//	AppDelegate *app = [[UIApplication sharedApplication] delegate];
+//
+//	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
+//																	 discoveryInfo: discoveryInfo
+//																	   serviceType: self.serviceType];
+//	self.nearbyServiceAdvertiser.delegate = self;
+//	
+//	[self.nearbyServiceAdvertiser startAdvertisingPeer];
+//
+//}
+//
+//- (IBAction)btnStartAdvertisingIPHONE:(id)sender
+//{
+//
+//	//[self showAlert:@"iPhone" message:@"startAdvertisingPeer"];
+//	[self startAdvertising];
+//
+//}
+//
+//- (IBAction)btnStartAdvertisingIPAD:(id)sender
+//{
+//
+//	//[self showAlert:@"iPad" message:@"startAdvertisingPeer"];
+//	[self startAdvertising];
+//
+//}
+//
+//- (IBAction)btnStopAdvertisingIPHONE:(id)sender
+//{
+//
+//	//[self showAlert:@"iPhone" message:@"stopAdvertisingPeer"];
+//	[self.nearbyServiceAdvertiser stopAdvertisingPeer];
+//
+//}
+//
+//- (IBAction)btnStopAdvertisingIPAD:(id)sender
+//{
+//
+//	//[self showAlert:@"iPad" message:@"stopAdvertisingPeer"];
+//	[self.nearbyServiceAdvertiser stopAdvertisingPeer];
+//
+//}
+//
 
 # pragma mark - Browsing
 
@@ -452,47 +442,47 @@ didReceiveInvitationFromPeer: (MCPeerID *)peerID
 - (void)setDisplayClient
 {
 
-	self.label_LoModel_1.hidden     = YES;
-	self.label_DisplayName_1.hidden = YES;
-	self.label_LoModel_2.hidden     = YES;
-	self.label_DisplayName_2.hidden = YES;
-	self.label_LoModel_3.hidden     = YES;
-	self.label_DisplayName_3.hidden = YES;
+//	self.label_ClientModel_1.hidden = YES;
+//	self.label_DisplayName_1.hidden = YES;
+//	self.label_ClientModel_2.hidden = YES;
+//	self.label_DisplayName_2.hidden = YES;
+//	self.label_ClientModel_3.hidden = YES;
+//	self.label_DisplayName_3.hidden = YES;
 	
 	NSInteger i = 0;
 	
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 	
-	for ( NSDictionary *dir in app.array_PeerID ) {
+	for ( NSDictionary *dir in app.array_ClientID ) {
 		
 		switch ( i ) {
 
 			case 0:
     
-				self.label_LoModel_1.hidden     = NO;
+				self.label_ClientModel_1.hidden = NO;
 				self.label_DisplayName_1.hidden = NO;
 				
-				self.label_LoModel_1.text     = [dir objectForKey: @"name"];
+				self.label_ClientModel_1.text = [dir objectForKey: @"name"];
 				self.label_DisplayName_1.text = [dir objectForKey: @"display_name"];
 			
 				break;
 				
 			case 1:
 				
-				self.label_LoModel_2.hidden     = NO;
+				self.label_ClientModel_2.hidden = NO;
 				self.label_DisplayName_2.hidden = NO;
 				
-				self.label_LoModel_2.text     = [dir objectForKey: @"name"];
+				self.label_ClientModel_2.text = [dir objectForKey: @"name"];
 				self.label_DisplayName_2.text = [dir objectForKey: @"display_name"];
 				
 				break;
 				
 			case 2:
 				
-				self.label_LoModel_3.hidden     = NO;
+				self.label_ClientModel_3.hidden = NO;
 				self.label_DisplayName_3.hidden = NO;
 				
-				self.label_LoModel_3.text     = [dir objectForKey: @"name"];
+				self.label_ClientModel_3.text = [dir objectForKey: @"name"];
 				self.label_DisplayName_3.text = [dir objectForKey: @"display_name"];
 				
 				break;
@@ -509,9 +499,40 @@ didReceiveInvitationFromPeer: (MCPeerID *)peerID
 	
 }
 
+- (IBAction)button_Action:(id)sender
+{
+
+	MCBrowserViewController *browserViewController;
+	browserViewController = [[MCBrowserViewController alloc] initWithServiceType: self.serviceType
+																		 session: self.advertiserAssistant.session];
+	
+	browserViewController.delegate = self;
+	browserViewController.minimumNumberOfPeers = kMCSessionMinimumNumberOfPeers;
+	browserViewController.maximumNumberOfPeers = kMCSessionMaximumNumberOfPeers;
+	
+	[self presentViewController: browserViewController animated:YES completion:NULL];
+	
+}
+
 - (IBAction)toPlay_Action:(id)sender
 {
 
+}
+
+- (void)browserViewControllerDidFinish: (MCBrowserViewController *)browserViewController
+{
+	
+	[browserViewController dismissViewControllerAnimated: YES
+											  completion: nil];
+	
+}
+
+- (void)browserViewControllerWasCancelled:(MCBrowserViewController *)browserViewController
+{
+	
+	[browserViewController dismissViewControllerAnimated: YES
+											  completion: nil];
+	
 }
 
 @end

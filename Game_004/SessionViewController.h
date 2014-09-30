@@ -9,24 +9,24 @@
 #import <UIKit/UIKit.h>
 #import <MultipeerConnectivity/MultipeerConnectivity.h>
 
-@interface SessionViewController : UIViewController < MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate >
+@interface SessionViewController : UIViewController < /*MCNearbyServiceAdvertiserDelegate,*/ MCAdvertiserAssistantDelegate,    MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate >
 {
 
 }
 
 @property (strong, nonatomic) NSString *serviceType;
 @property (strong, nonatomic) MCNearbyServiceBrowser *nearbyServiceBrowser;
-@property (strong, nonatomic) MCNearbyServiceAdvertiser *nearbyServiceAdvertiser;
+//@property (strong, nonatomic) MCNearbyServiceAdvertiser *nearbyServiceAdvertiser;
+@property (strong, nonatomic) MCAdvertiserAssistant *advertiserAssistant;
 
-@property (weak, nonatomic) IBOutlet UILabel *label_Model;
-@property (weak, nonatomic) IBOutlet UISwitch *switch_Server;
-@property (weak, nonatomic) IBOutlet UILabel *label_Server;
+@property (weak, nonatomic) IBOutlet UILabel *label_ServerModel;
+@property (weak, nonatomic) IBOutlet UILabel *label_DisplayName;
 
-@property (weak, nonatomic) IBOutlet UILabel *label_LoModel_1;
+@property (weak, nonatomic) IBOutlet UILabel *label_ClientModel_1;
 @property (weak, nonatomic) IBOutlet UILabel *label_DisplayName_1;
-@property (weak, nonatomic) IBOutlet UILabel *label_LoModel_2;
+@property (weak, nonatomic) IBOutlet UILabel *label_ClientModel_2;
 @property (weak, nonatomic) IBOutlet UILabel *label_DisplayName_2;
-@property (weak, nonatomic) IBOutlet UILabel *label_LoModel_3;
+@property (weak, nonatomic) IBOutlet UILabel *label_ClientModel_3;
 @property (weak, nonatomic) IBOutlet UILabel *label_DisplayName_3;
 
 //@property (weak, nonatomic) IBOutlet UILabel *labelMyPeerIDIPHONE;

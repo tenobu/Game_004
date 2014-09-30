@@ -105,7 +105,7 @@
 	
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 	
-	for ( NSMutableDictionary *dic in app.array_PeerID ) {
+	for ( NSMutableDictionary *dic in app.array_ClientID ) {
 		
 		MCPeerID *peer_id = [dic objectForKey: @"peer_id"];
 		
@@ -208,7 +208,7 @@ didStartReceivingResourceWithName: (NSString *)resourceName
 	
 	AppDelegate *app = [[UIApplication sharedApplication] delegate];
 	
-	for ( NSDictionary *dir in app.array_PeerID ) {
+	for ( NSDictionary *dir in app.array_ClientID ) {
 		
 		switch ( i ) {
 				
