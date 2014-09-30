@@ -17,6 +17,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	
+	self.string_ServerClient = @"Server";
+	
 	self.array_ServerID = [[NSMutableArray alloc] init];
 	self.array_ClientID = [[NSMutableArray alloc] init];
 	

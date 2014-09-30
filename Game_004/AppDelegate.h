@@ -13,6 +13,8 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (strong, nonatomic) NSString *string_ServerClient;
+
 @property (strong, nonatomic) MCPeerID *myPeerID;
 @property (strong, nonatomic) MCSession *session;
 

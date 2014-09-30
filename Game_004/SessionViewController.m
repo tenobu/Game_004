@@ -25,6 +25,7 @@
 	
 	[super viewDidLoad];
 
+
 	
 	NSUUID *uuid = [NSUUID UUID];
 	
@@ -43,13 +44,23 @@
 
 	UIDevice *dev = [UIDevice currentDevice];
 
-	self.label_ServerModel.text = dev.name;
-	self.label_DisplayName.text = app.myPeerID.displayName;
+	self.label_MyModel.text = dev.name;
+	self.label_MyName.text  = app.myPeerID.displayName;
 	
 	NSLog( @"%@", dev.name );
-
-	[self setServerClient];
 	
+	if ( [app.string_ServerClient isEqualToString: @"Server"] ) {
+		
+		self.switch_ServerClient.on = YES;
+		
+	} else {
+		
+		self.switch_ServerClient.on = NO;
+		
+	}
+	
+	[self setServerClient];
+
 	[self setDisplayClient];
 	
 }
@@ -70,37 +81,41 @@
 
 	//[app.array_PeerID removeAllObjects];
 	
-	
-	// サーバー
-	self.nearbyServiceBrowser = [[MCNearbyServiceBrowser alloc] initWithPeer: app.myPeerID
-																 serviceType: self.serviceType];
-		
-	self.nearbyServiceBrowser.delegate = self;
-		
-	[self.nearbyServiceBrowser startBrowsingForPeers];
-	
-
-	// クライアント
 	NSDictionary *discoveryInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-								   self.label_ServerModel.text, @"name"        ,
-								   self.label_DisplayName.text, @"display_name",
-								   @"000000"                  , @"your_tansu"  , nil];
-
-	self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
-																	 discoveryInfo: discoveryInfo
-																	   serviceType: self.serviceType];
+								   self.label_MyModel.text, @"name"        ,
+								   self.label_MyName.text , @"display_name",
+								   @"000000"              , @"your_tansu"  , nil];
+	
+	if ( self.switch_ServerClient.on ) {
 		
-	self.nearbyServiceAdvertiser.delegate = self;
+		// サーバー
+		self.nearbyServiceBrowser = [[MCNearbyServiceBrowser alloc] initWithPeer: app.myPeerID
+																	 serviceType: self.serviceType];
 		
-	[self.nearbyServiceAdvertiser startAdvertisingPeer];
+		self.nearbyServiceBrowser.delegate = self;
+		
+		[self.nearbyServiceBrowser startBrowsingForPeers];
+		
+		self.advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType: self.serviceType
+																		discoveryInfo: discoveryInfo
+																			  session: app.session];
+		
+		self.advertiserAssistant.delegate = self;
+		
+		[self.advertiserAssistant start];
 
-//	self.advertiserAssistant = [[MCAdvertiserAssistant alloc] initWithServiceType: self.serviceType
-//																	discoveryInfo: discoveryInfo
-//																		  session: app.session];
-//
-//	self.advertiserAssistant.delegate = self;
-//	
-//	[self.advertiserAssistant start];
+	} else {
+		
+		// クライアント
+		self.nearbyServiceAdvertiser = [[MCNearbyServiceAdvertiser alloc] initWithPeer: app.myPeerID
+																		 discoveryInfo: discoveryInfo
+																		   serviceType: self.serviceType];
+		
+		self.nearbyServiceAdvertiser.delegate = self;
+		
+		[self.nearbyServiceAdvertiser startAdvertisingPeer];
+
+	}
 	
 	[self setDisplayClient];
 	
