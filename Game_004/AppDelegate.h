@@ -7,11 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MultipeerConnectivity/MultipeerConnectivity.h>
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (strong, nonatomic) MCPeerID *myPeerID;
+@property (strong, nonatomic) MCSession *session;
+
+@property (strong, nonatomic) NSString *string_ServerClient;
+
+@property (strong, nonatomic) NSMutableArray *array_PeerID;
 
 @end
 
