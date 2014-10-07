@@ -37,6 +37,8 @@
 	array_OthersTensu = [[NSMutableArray alloc] init];
 	
 	[self setDisplayClient];
+
+	NSLog( @"" );
 	
 }
 
